@@ -2,40 +2,44 @@ local composer = require( "composer" )
  
 local scene = composer.newScene()
 
+local backGroup  = display.newGroup()
+local mainGroup  = display.newGroup()
+local uiGroup = display.newGroup()
+
 local background
 local plataforma
 local button
-local Group1 = display.newGroup()
-local Group2 = display.newGroup()
+
 
 local function proximaCenas()
     composer.gotoScene("Cenas.game" , {effect= "crossFade", time= 500})
 end
 
-    --Fundo (Camada 1)
-background = display.newImageRect( Group1, "Imagens/layer-3.png" , 450, 650)
-background.x = display.contentCenterX
-background.y = display.contentCenterY
-
-    --Plataforma (Camada 1)
-plataforma = display.newImageRect(Group1, "Imagens/layer-4.png" , 450, 650)
-plataforma.x = display.contentCenterX
-plataforma.y = display.contentCenterY-20
-  
-    --Botão (Camada 2)
-button = display.newImageRect(Group2, "Imagens/Button.png" , 150, 80)
-button.x = display.contentCenterX
-button.y = display.contentCenterY+100
-button:addEventListener("tap", proximaCenas)
 
 -- create()
 function scene:create( event )
 
     local sceneGroup = self.view
-    --Colocando grupos na Cena
-    sceneGroup:insert(Group1)
-    sceneGroup:insert(Group2)
 
+        --Fundo (Camada 1)
+    background = display.newImageRect( backGroup, "Imagens/layer-3.png" , 450, 650)
+    background.x = display.contentCenterX
+    background.y = display.contentCenterY
+
+        --Plataforma (Camada 1)
+    plataforma = display.newImageRect(mainGroup, "Imagens/layer-4.png" , 450, 650)
+    plataforma.x = display.contentCenterX
+    plataforma.y = display.contentCenterY-8
+    
+        --Botão (Camada 2)
+    button = display.newImageRect(uiGroup, "Imagens/Button.png" , 150, 80)
+    button.x = display.contentCenterX
+    button.y = display.contentCenterY+100
+    button:addEventListener("tap", proximaCenas)
+
+    sceneGroup:insert(backGroup)
+    sceneGroup:insert(mainGroup)
+    sceneGroup:insert(uiGroup)
 end
  
  
