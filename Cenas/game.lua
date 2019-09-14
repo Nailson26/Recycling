@@ -4,14 +4,14 @@ local scene = composer.newScene()
 
 local physics = require( "physics" )
 physics.start()
-physics.setGravity( 0, 0 )
--- physics.setDrawMode("hybrid")
+physics.setGravity( 0, 4 )
+physics.setDrawMode("hybrid")
 
 --Grupos
 local backGroup = display.newGroup()
 local mainGroup = display.newGroup()
 local uiGroup = display.newGroup()
-local lixos = display.newGroup()
+-- local lixos = display.newGroup()
 
 --Variaveis
 local background
@@ -22,48 +22,69 @@ local lixeiraVermelha
 local lixeiraAmarela
 local lixeiraVerde
 
+
+
+
 local gameLoopTimer
 
 local trashTable = {}
 
-
-
 --funções
+
+
 local function createTrash()
 
-	local newTrash = display.newImageRect( mainGroup,"Imagens/garrafa.png", 102, 85 )
-	table.insert( trashTable, newTrash )
-	physics.addBody( newTrash, "dynamic", { radius=30, bounce=0.5 } )
-	newTrash.myName = "trash"
+    local newTrash = display.newImageRect( mainGroup,"Imagens/garrafa-vidro.png", 20, 40 )
+    table.insert( trashTable, newTrash )
+    physics.addBody( newTrash, "dynamic", { radius=30, bounce=0.5 } )
+    newTrash.myName = "trash"
 
-	local whereFrom = math.random( 3 )
+	local whereFrom = 2
 
 	if ( whereFrom == 1 ) then
 		-- From the left
 		newTrash.x = -60
-		newTrash.y = math.random( 500 )
+		newTrash.y = math.random( 200 )
 		newTrash:setLinearVelocity( math.random( 40,120 ), math.random( 20,60 ) )
 	elseif ( whereFrom == 2 ) then
 		-- From the top
 		newTrash.x = math.random( display.contentWidth )
 		newTrash.y = -60
-		newTrash:setLinearVelocity( math.random( -40,40 ), math.random( 40,120 ) )
+		newTrash:setLinearVelocity( 0, math.random( 2,4 ) )
 	elseif ( whereFrom == 3 ) then
 		-- From the right
 		newTrash.x = display.contentWidth + 60
-		newTrash.y = math.random( 500 )
+		newTrash.y = math.random( 200 )
 		newTrash:setLinearVelocity( math.random( -120,-40 ), math.random( 20,60 ) )
 	end
+    newTrash:applyTorque( math.random( -6,6 ) )
 
-	newTrash:applyTorque( math.random( -6,6 ) )
+    local function moverLixo(e)
+        if(e.phase == 'began') then
+            lastX = e.x - newTrash.x
+        elseif(e.phase == 'moved') then
+            local newPosition = e.x - lastX 
+            if(newPosition > 65 and newPosition < 700) then
+                newTrash.x = e.x - lastX
+            end
+        end  
+    end
+    newTrash:addEventListener("touch", moverLixo)
 end
+
 
 local function gameLoop()
 
 	-- Create new trash
-	createTrash()
+    createTrash()
+    local j = 1
+    -- for j = 1, #trashTable do
+    --     trashTable[j]:addEventListener("touch", moverLixo())
+    -- end
+    
 
-	-- Remove asteroids which have drifted off screen
+
+	-- Remove trash which have drifted off screen
 	for i = #trashTable, 1, -1 do
 		local thisTrash = trashTable[i]
 
@@ -133,7 +154,7 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         physics.start()
-        gameLoopTimer = timer.performWithDelay( 500, gameLoop, 0 )
+        gameLoopTimer = timer.performWithDelay( 3000, gameLoop, 0 )
  
     end
 end
