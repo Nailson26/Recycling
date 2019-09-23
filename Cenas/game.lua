@@ -2,16 +2,16 @@ local composer = require( "composer" )
  
 local scene = composer.newScene()
 
+--Fisica
 local physics = require( "physics" )
 physics.start()
-physics.setGravity( 0, 4 )
-physics.setDrawMode("hybrid")
+physics.setGravity( 0, 2)
+-- physics.setDrawMode("hybrid")
 
 --Grupos
 local backGroup = display.newGroup()
 local mainGroup = display.newGroup()
 local uiGroup = display.newGroup()
--- local lixos = display.newGroup()
 
 --Variaveis
 local background
@@ -21,50 +21,43 @@ local lixeiraAzul
 local lixeiraVermelha
 local lixeiraAmarela
 local lixeiraVerde
-
-
-
+local pontuacao
 
 local gameLoopTimer
 
+--Tabelas
 local trashTable = {}
 
 --funções
-
-
 local function createTrash()
 
-    local newTrash = display.newImageRect( mainGroup,"Imagens/garrafa-vidro.png", 20, 40 )
-    table.insert( trashTable, newTrash )
-    physics.addBody( newTrash, "dynamic", { radius=30, bounce=0.5 } )
+    local tipoLixo = {}
+    tipoLixo[1] =  display.newImageRect( "Imagens/garrafa-vidro.png", 20, 40)
+    tipoLixo[2] =  display.newImageRect( "Imagens/lata.png", 30, 40)
+    tipoLixo[3] =  display.newImageRect( "Imagens/vidro.png", 30, 40)
+    tipoLixo[4] =  display.newImageRect( "Imagens/papel.png", 40, 40)
+    tipoLixo[1].x = -200
+    tipoLixo[2].x = -200
+    tipoLixo[3].x = -200
+    tipoLixo[4].x = -200
+    
+    local newTrash = tipoLixo[math.random( 1,4 )]
+    physics.addBody( newTrash, "dynamic", { radius=30, bounce=0.0 } )
     newTrash.myName = "trash"
-
-	local whereFrom = 2
-
-	if ( whereFrom == 1 ) then
-		-- From the left
-		newTrash.x = -60
-		newTrash.y = math.random( 200 )
-		newTrash:setLinearVelocity( math.random( 40,120 ), math.random( 20,60 ) )
-	elseif ( whereFrom == 2 ) then
-		-- From the top
-		newTrash.x = math.random( display.contentWidth )
-		newTrash.y = -60
-		newTrash:setLinearVelocity( 0, math.random( 2,4 ) )
-	elseif ( whereFrom == 3 ) then
-		-- From the right
-		newTrash.x = display.contentWidth + 60
-		newTrash.y = math.random( 200 )
-		newTrash:setLinearVelocity( math.random( -120,-40 ), math.random( 20,60 ) )
-	end
+    newTrash.x = math.random( 20, display.contentWidth-20 )
+    newTrash.y = -60
+    newTrash:setLinearVelocity( 0, math.random( 2,4 ) )
     newTrash:applyTorque( math.random( -6,6 ) )
+    table.insert( trashTable, newTrash )
 
+    local lastX = 0 --variavel que move o lixo no eixo X
+    
     local function moverLixo(e)
         if(e.phase == 'began') then
-            lastX = e.x - newTrash.x
+             lastX = e.x - newTrash.x
         elseif(e.phase == 'moved') then
             local newPosition = e.x - lastX 
-            if(newPosition > 65 and newPosition < 700) then
+            if(newPosition > 20 and newPosition < display.contentWidth-20 ) then
                 newTrash.x = e.x - lastX
             end
         end  
@@ -77,12 +70,6 @@ local function gameLoop()
 
 	-- Create new trash
     createTrash()
-    local j = 1
-    -- for j = 1, #trashTable do
-    --     trashTable[j]:addEventListener("touch", moverLixo())
-    -- end
-    
-
 
 	-- Remove trash which have drifted off screen
 	for i = #trashTable, 1, -1 do
@@ -103,12 +90,11 @@ end
 function scene:create( event )
  
     local sceneGroup = self.view
-    physics.pause()
+    -- physics.pause()
 
     background = display.newImageRect(backGroup, "Imagens/layer-3.png" , 450, 650)
     background.x = display.contentCenterX
 	background.y = display.contentCenterY
-	--physics.addBody(plataforma, "static")
 
     plataforma = display.newImageRect(mainGroup, "Imagens/layer-5.png" , 450, 80)
     plataforma.x = display.contentCenterX
@@ -133,8 +119,9 @@ function scene:create( event )
 	lixeiraVerde = display.newImageRect(mainGroup, "Imagens/lixeira-verde-vidro.png" , 60, 80)
     lixeiraVerde.x = display.contentCenterX+120
 	lixeiraVerde.y = display.contentCenterY+210
-	physics.addBody(lixeiraVerde, "static")
-	
+    physics.addBody(lixeiraVerde, "static")
+    
+    
 
     sceneGroup:insert(backGroup)
     sceneGroup:insert(mainGroup)
@@ -150,12 +137,10 @@ function scene:show( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is still off screen (but is about to come on screen)
-        --criarLixo()
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         physics.start()
-        gameLoopTimer = timer.performWithDelay( 3000, gameLoop, 0 )
- 
+        gameLoopTimer = timer.performWithDelay( 2000, gameLoop, 0 )
     end
 end
  

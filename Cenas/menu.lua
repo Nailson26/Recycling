@@ -9,6 +9,7 @@ local uiGroup = display.newGroup()
 local background
 local plataforma
 local button
+local logo
 
 
 local function proximaCenas()
@@ -30,10 +31,15 @@ function scene:create( event )
     plataforma = display.newImageRect(mainGroup, "Imagens/layer-4.png" , 450, 650)
     plataforma.x = display.contentCenterX
     plataforma.y = display.contentCenterY-8
+
+        --logo
+    logo = display.newImageRect(mainGroup, "Imagens/logo-recycling.png" , 250, 400)
+    logo.x = display.contentWidth/2 -5
+    logo.y = display.contentCenterY/2
     
         --Botão (Camada 2)
     button = display.newImageRect(uiGroup, "Imagens/Button.png" , 150, 80)
-    button.x = display.contentCenterX
+    button.x = display.contentWidth/2 
     button.y = display.contentCenterY+100
     button:addEventListener("tap", proximaCenas)
 
