@@ -20,38 +20,57 @@ local lixeiraVermelha
 local lixeiraAmarela
 local lixeiraVerde
 local caixaPontuacao
+local pontuacao
 local pontos
 local vidas
 local gameLoopTimer
-local gameLoopDificuldade
 local velocidadeQueda
 local velocidadeGerar
+local regenerador
+local offSet
+local caixaVidas
+local quantidadeVidas
+local dificuldade
+local velocidade
 
 --Tabelas
 local trashTable = {}
-
+local lifeTable = {}
 
 --Inicialização de variaveis
 pontos = 0
 vidas = 3
 velocidadeGerar = 3000
 velocidadeQueda = 1
+regenerador = 0
+offSet = { halfWidth = 18, halfHeight = 5, x = 0, y= -21 }
 
 --Inicialização da física
-physics.setGravity( 0, 1 )
+ physics.setGravity( 0, 0.5 )
 
 --funções
+
+local function gameOver()
+    composer.gotoScene("Cenas.gameOver" , {effect= "crossFade", time= 500})
+end
+
+
+
 local function createTrash()
 
     local this = math.random(1,9)
+    local thisOutLine = graphics.newOutline( 0, base.tipoLixo[this].img )
+    -- local thisQueda = audio.loadStream( "Musicas/queda.wav")
+    -- audio.play(thisQueda, {channel = 10})
+    -- audio.setVolume(0.3)
 
     local newTrash = display.newImageRect(mainGroup, base.tipoLixo[this].img, base.tipoLixo[this].x, base.tipoLixo[this].y)
-    physics.addBody( newTrash, "dynamic", { radius=30, bounce=0.0 } )
+    physics.addBody( newTrash, "dynamic", { outline= thisOutLine, bounce=0}  )
     newTrash.myName = "trash"
     newTrash.x = math.random( 20, display.contentWidth-20 )
-    newTrash.y = -60
+    newTrash.y =  - 60
     newTrash:setLinearVelocity( 0, velocidadeQueda )
-    newTrash:applyTorque( math.random( -6,6 ) )
+    newTrash:applyTorque(0.1)
     table.insert( trashTable, newTrash )
 
     local lastX = 0 --variavel que move o lixo no eixo X
@@ -72,10 +91,128 @@ local function createTrash()
         local obj1 = event.target
         local obj2 = event.other
 
-        if(obj2.myName == base.tipoLixo[this].tipo)
+        if(obj2.myName == "Lixeira" and obj2.tipo == base.tipoLixo[this].tipo)
         then
             display.remove(obj1)
             pontos = pontos + 10
+            regenerador = regenerador + 1
+            local reciclado = audio.loadStream( "Musicas/Item1A.wav")
+	        audio.play(reciclado, {channel = 3})
+	        audio.setVolume( 1.0 , {channel = 3} )
+            for i = #trashTable, 1, -1 do
+                if ( trashTable[i] == obj1) then
+                    table.remove( trashTable, i)
+                    break
+                end
+            end
+        elseif(obj2.myName == "Plataforma" and obj1.myName == "trash")
+        then
+            display.remove(obj1)
+            vidas = vidas - 1
+            regenerador = 0
+            local NaoReciclado = audio.loadStream( "Musicas/Item1B.wav")
+	        audio.play(NaoReciclado, {channel = 3})
+	        audio.setVolume( 1.0 , {channel = 3} )
+            for i = #trashTable, 1, -1 do
+                if ( trashTable[i] == obj1) then
+                    table.remove( trashTable, i)
+                    break
+                end
+            end
+            if(vidas == 0)
+            then
+                timer.performWithDelay(300, gameOver)
+            end
+        elseif(obj2.myName == "Lixeira" and obj2.tipo ~= base.tipoLixo[this].tipo)
+        then 
+            display.remove(obj1)
+            vidas = vidas - 1
+            regenerador = 0
+            local NaoReciclado = audio.loadStream( "Musicas/Item1B.wav")
+	        audio.play(NaoReciclado, {channel = 3})
+	        audio.setVolume( 1.0 , {channel = 3} )
+            for i = #trashTable, 1, -1 do
+                if ( trashTable[i] == obj1) then
+                    table.remove( trashTable, i)
+                    break
+                end
+            end
+            if(vidas == 0)
+            then
+                gameOver()
+            end
+        end
+    end
+    newTrash.collision = colisaoLixo
+    newTrash:addEventListener("collision")
+end
+
+local function criarVidas()
+    local this = math.random(1,4)
+    local thisOutLine = graphics.newOutline( 0, base.vida[this].img )
+
+    local newLife = display.newImageRect(mainGroup, base.vida[this].img, base.vida[this].x, base.vida[this].y)
+    physics.addBody( newLife, "dynamic", { outline=thisOutLine, bounce=0} )
+    newLife.myName = "life"
+    newLife.x = math.random( 20, display.contentWidth-20 )
+    newLife.y = -60
+    newLife:setLinearVelocity( 0, velocidadeQueda )
+    -- newLife:applyTorque( math.random( -4,4 ) )
+    table.insert( lifeTable, newLife )
+
+    local lastX = 0 --variavel que move a vida no eixo X
+    
+    local function moverlife(e)
+        if(e.phase == 'began') then
+             lastX = e.x - newLife.x
+        elseif(e.phase == 'moved') then
+            local newPosition = e.x - lastX 
+            if(newPosition > 20 and newPosition < display.contentWidth-20 ) then
+                newLife.x = e.x - lastX
+            end
+        end  
+    end
+    newLife:addEventListener("touch", moverlife)
+
+    local function colisaoLife(self, event)
+        local obj1 = event.target
+        local obj2 = event.other
+
+        if(obj2.myName == "Lixeira" and obj2.tipo == base.vida[this].tipo)
+        then
+            display.remove(obj1)
+            if(vidas < 3)then
+                vidas = vidas + 1
+            elseif(vidas == 3)then
+                pontos = pontos + 50
+            end
+            local vidaAcerto = audio.loadStream( "Musicas/vida-acerto.wav")
+            audio.play(vidaAcerto, {channel = 6})
+            audio.setVolume(0.3)
+            for i = #lifeTable, 1, -1 do
+                if ( lifeTable[i] == obj1) then
+                    table.remove( lifeTable, i)
+                    break
+                end
+            end
+        elseif(obj2.myName == "Plataforma" and obj1.myName == "trash")
+        then
+            display.remove(obj1)
+            local vidaErro = audio.loadStream( "Musicas/vida-erro.wav")
+            audio.play(vidaErro, {channel = 6})
+            audio.setVolume(0.3)
+            for i = #trashTable, 1, -1 do
+                if ( trashTable[i] == obj1) then
+                    table.remove( trashTable, i)
+                    break
+                end
+            end
+        elseif(obj2.myName == "Lixeira" and obj2.tipo ~= base.vida[this].tipo)
+        then 
+            display.remove(obj1)
+            local vidaErro = audio.loadStream( "Musicas/vida-erro.wav")
+            audio.play(vidaErro, {channel = 6})
+            audio.setVolume(0.3)
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
                     table.remove( trashTable, i)
@@ -84,15 +221,25 @@ local function createTrash()
             end
         end
     end
-    newTrash.collision = colisaoLixo
-    newTrash:addEventListener("collision")
+    newLife.collision = colisaoLife
+    newLife:addEventListener("collision")
+    regenerador = 0
 end
+
+
+local function aumentarDificuldade()
+    if(velocidadeQueda < 1000)
+    then
+        velocidadeQueda = velocidadeQueda + 10
+    end
+end
+
 
 
 local function gameLoop()
 	-- Create new trash
     createTrash()
-
+    
 	-- Remove trash which have drifted off screen
 	for i = #trashTable, 1, -1 do
 		local thisTrash = trashTable[i]
@@ -106,28 +253,36 @@ local function gameLoop()
 			table.remove( trashTable, i )
 		end
     end
-    
 
+    -- for i = #lifeTable, 1, -1 do
+	-- 	local thisLife = lifeTable[i]
+
+	-- 	if ( thisLife.x < -100 or
+	-- 		 thisLife.x > display.contentWidth + 100 or
+	-- 		 thisLife.y < -100 or
+	-- 		 thisLife.y > display.contentHeight + 100 )
+	-- 	then
+	-- 		display.remove( thisLife )
+	-- 		table.remove( lifeTable, i )
+	-- 	end
+    -- end
 end
 
-local function aumentarDificuldade()
-    if(velocidadeQueda < 1000)
-    then
-        velocidadeQueda = velocidadeQueda + 10
-        print(velocidadeQueda)
+
+local function atualizador()
+    pontuacao.text = pontos
+    quantidadeVidas.text = vidas
+
+    if(regenerador == 10)then
+        criarVidas()
     end
-end
 
-local function aumentarVelocidadeQueda(event)
-    if(velocidadeQueda < 100)then
-        gameLoopTimer = timer.performWithDelay(3000, gameLoop, 0 )
-        print("gerando a cada 3 segundos")
-    elseif(velocidadeQueda > 100 and velocidadeQueda < 200)then
-        gameLoopTimer = timer.performWithDelay(2000, gameLoop, 0 )
-        print("gerando a cada 2 segundos")
-    elseif(velocidadeQueda > 200)then
-        gameLoopTimer = timer.performWithDelay(1000, gameLoop, 0 )
-        print("gerando a cada 1 segundos")
+end
+Runtime:addEventListener( "enterFrame", atualizador )
+
+local function velocidadeCriacao()
+    if(velocidadeGerar ~= 1000)then
+        velocidadeGerar = velocidadeGerar -1000
     end
 end
 
@@ -144,39 +299,56 @@ function scene:create( event )
     plataforma = display.newImageRect(mainGroup, "Imagens/layer-5.png" , 450, 80)
     plataforma.x = display.contentCenterX
     plataforma.y = display.contentHeight+40
-	physics.addBody(plataforma, "static")
+    physics.addBody(plataforma, "static" )
+    plataforma.myName = "Plataforma"
 	
-	lixeiraAzul = display.newImageRect(mainGroup, "Imagens/lixeira-azul-papel.png" , 60, 80)
-    lixeiraAzul.x = display.contentCenterX-120
-	lixeiraAzul.y = display.contentCenterY+210
-    physics.addBody(lixeiraAzul, "static")
-    lixeiraAzul.myName = "Papel"
-	
-	lixeiraVermelha = display.newImageRect(mainGroup, "Imagens/lixeira-vermelho-plastico.png" , 60, 80)
-    lixeiraVermelha.x = display.contentCenterX-40
-	lixeiraVermelha.y = display.contentCenterY+210
-    physics.addBody(lixeiraVermelha, "static")
-    lixeiraVermelha.myName = "Plastico"
+	lixeiraAzul = display.newImageRect(mainGroup, "Imagens/lixeira-azul.png" , 80, 100)
+    lixeiraAzul.x = (display.contentWidth/4)/2
+	lixeiraAzul.y = display.contentCenterY+198
+    physics.addBody(lixeiraAzul, "static" , {box = offSet})
+    lixeiraAzul.myName = "Lixeira"
+    lixeiraAzul.tipo = "Papel"
+    
+	lixeiraVermelha = display.newImageRect(mainGroup, "Imagens/lixeira-vermelha.png" , 80, 100)
+    lixeiraVermelha.x = (display.contentWidth/4)/2 + 80
+	lixeiraVermelha.y = display.contentCenterY+198
+    physics.addBody(lixeiraVermelha, "static", {box = offSet})
+    lixeiraVermelha.myName = "Lixeira"
+    lixeiraVermelha.tipo = "Plastico"
 
-	lixeiraAmarela = display.newImageRect(mainGroup, "Imagens/lixeira-amarela-metal.png" , 60, 80)
-    lixeiraAmarela.x = display.contentCenterX+40
-	lixeiraAmarela.y = display.contentCenterY+210
-    physics.addBody(lixeiraAmarela, "static")
-    lixeiraAmarela.myName = "Metal"
+	lixeiraAmarela = display.newImageRect(mainGroup, "Imagens/lixeira-amarela.png" , 80, 100)
+    lixeiraAmarela.x = (display.contentWidth/4)/2 + 160
+	lixeiraAmarela.y = display.contentCenterY+198
+    physics.addBody(lixeiraAmarela, "static", {box = offSet})
+    lixeiraAmarela.myName = "Lixeira"
+    lixeiraAmarela.tipo = "Metal"
 
-	lixeiraVerde = display.newImageRect(mainGroup, "Imagens/lixeira-verde-vidro.png" , 60, 80)
-    lixeiraVerde.x = display.contentCenterX+120
-	lixeiraVerde.y = display.contentCenterY+210
-    physics.addBody(lixeiraVerde, "static")
-    lixeiraVerde.myName = "Vidro"
+	lixeiraVerde = display.newImageRect(mainGroup, "Imagens/lixeira-verde.png" , 80, 100)
+    lixeiraVerde.x = (display.contentWidth/4)/2 + 240
+	lixeiraVerde.y = display.contentCenterY+198
+    physics.addBody(lixeiraVerde, "static", {box = offSet})
+    lixeiraVerde.myName = "Lixeira"
+    lixeiraVerde.tipo = "Vidro"
     
     caixaPontuacao = display.newImageRect(uiGroup, "Imagens/Caixa-pontuacao.png" , 110, 40)
     caixaPontuacao.x = display.contentWidth-55
 
+    pontuacao = display.newText(uiGroup, "0",  240, 300, native.systemFont, 16 )
+    pontuacao.x = display.contentWidth-25
+    pontuacao.y = display.contentCenterY-240
+
+    caixaVidas = display.newImageRect(uiGroup, "Imagens/caixa-vidas.png" , 110, 40)
+    caixaVidas.x = display.contentWidth-55
+    caixaVidas.y = display.contentHeight/2 - 200
+
+    quantidadeVidas = display.newText(uiGroup, "3",  240, 300, native.systemFont, 16 )
+    quantidadeVidas.x = display.contentWidth-25
+    quantidadeVidas.y = display.contentCenterY-200
 
     sceneGroup:insert(backGroup)
     sceneGroup:insert(mainGroup)
     sceneGroup:insert(uiGroup)
+    
 end
  
  
@@ -190,9 +362,10 @@ function scene:show( event )
         -- Code here runs when the scene is still off screen (but is about to come on screen)
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
-        physics.start()
-        gameLoopDificuldade = timer.performWithDelay(10000, aumentarDificuldade, 0 )
-        gameLoopTimer = timer.performWithDelay(3000, gameLoop, 0 )
+        -- physics.start()
+        gameLoopTimer = timer.performWithDelay(velocidadeGerar, gameLoop, -1)
+        dificuldade = timer.performWithDelay(10000, aumentarDificuldade, 0 )
+        velocidade =  timer.performWithDelay(60000, velocidadeCriacao, 0 )
     end
 end
  
@@ -206,10 +379,15 @@ function scene:hide( event )
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
         timer.cancel( gameLoopTimer )
- 
+        timer.cancel(dificuldade)
+        timer.cancel(velocidade)
+        audio.stop(2)
+        audio.stop(3)
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
- 
+        Runtime:removeEventListener("enterFrame", atualizador)
+        physics.pause()
+        composer.removeScene("Cenas.game")
     end
 end
  
@@ -219,7 +397,7 @@ function scene:destroy( event )
  
     local sceneGroup = self.view
     -- Code here runs prior to the removal of scene's view
- 
+    package.loaded["Cenas.game"] = nil
 end
  
  

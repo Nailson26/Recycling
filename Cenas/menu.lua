@@ -10,12 +10,32 @@ local background
 local plataforma
 local button
 local logo
-
+local buttonSom
+local somPause = false
 
 local function proximaCenas()
+    local toquePlay = audio.loadStream( "Musicas/Menu1A.wav")
+	audio.play(toquePlay, {channel = 5})
+	audio.setVolume( 1.0 , {channel = 5} )
     composer.gotoScene("Cenas.game" , {effect= "crossFade", time= 500})
 end
 
+local musica = audio.loadStream( "Musicas/musica-loop.mp3")
+audio.play(musica, {channel = 2, loops = -1})
+audio.setVolume(0.3)
+
+local function DesativarSom()
+    if(somPause == false)then
+        audio.stop(2)
+        somPause = true
+
+    elseif(somPause == true)then
+        local musica = audio.loadStream( "Musicas/musica-loop.mp3")
+        audio.play(musica, {channel = 2, loops = -1})
+        somPause = false
+
+    end
+end
 
 -- create()
 function scene:create( event )
@@ -38,10 +58,15 @@ function scene:create( event )
     logo.y = display.contentCenterY/2
     
         --Botão (Camada 2)
-    button = display.newImageRect(uiGroup, "Imagens/Button.png" , 150, 80)
+    button = display.newImageRect(uiGroup, "Imagens/button-play.png" , 150, 80)
     button.x = display.contentWidth/2 
     button.y = display.contentCenterY+100
     button:addEventListener("tap", proximaCenas)
+
+    buttonSom = display.newImageRect(uiGroup, "Imagens/button-som.png" , 50, 50)
+    buttonSom.x = (display.contentWidth/18) + display.contentWidth-50
+    buttonSom.y = (display.contentHeight/18) 
+    buttonSom:addEventListener("tap", DesativarSom)
 
     sceneGroup:insert(backGroup)
     sceneGroup:insert(mainGroup)
@@ -73,10 +98,13 @@ function scene:hide( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
- 
+        
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
- 
+        audio.stop(5)
+        button:removeEventListener("tap", proximaCenas)
+        buttonSom:removeEventListener("tap", DesativarSom)
+        composer.removeScene("Cenas.menu")
     end
 end
  
@@ -86,7 +114,7 @@ function scene:destroy( event )
  
     local sceneGroup = self.view
     -- Code here runs prior to the removal of scene's view
- 
+    -- package.loaded["Cenas.menu"] = nil
 end
  
  
