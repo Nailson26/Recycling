@@ -4,7 +4,7 @@ local base = require( "base" )
 --Fisica
 local physics = require( "physics" )
 physics.start()
-physics.setDrawMode("hybrid")
+-- physics.setDrawMode("hybrid")
 display.setStatusBar( display.HiddenStatusBar )
 
 --Grupos
@@ -76,14 +76,19 @@ local function createTrash()
     table.insert( trashTable, newTrash )
 
     local lastX = 0 --variavel que move o lixo no eixo X
-    
+    local lastY = 0 --variavel que move o lixo no eixo Y
+
     local function moverLixo(e)
         if(e.phase == 'began' and e.phase == 'moved') then
-             lastX = e.x - newTrash.x
+            lastX = e.x - newTrash.x
+            lastY = e.y - newTrash.y
+            newTrash:setLinearVelocity( 0, velocidadeQueda + 50)
         elseif(e.phase == 'moved') then
-            local newPosition = e.x - lastX 
-            if(newPosition > 20 and newPosition < display.contentWidth-20 ) then
+            local newPositionX = e.x - lastX 
+            if(newPositionX > 20 and newPositionX < display.contentWidth-20 ) then
                 newTrash.x = e.x - lastX
+                newTrash.y = e.y - lastY
+                newTrash:setLinearVelocity( 0, velocidadeQueda + 50 )
             end
         end  
     end
