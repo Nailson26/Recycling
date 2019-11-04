@@ -79,7 +79,7 @@ local function createTrash()
     local lastY = 0 --variavel que move o lixo no eixo Y
 
     local function moverLixo(e)
-        if(e.phase == 'began' and e.phase == 'moved') then
+        if(e.phase == 'began' ) then
             lastX = e.x - newTrash.x
             lastY = e.y - newTrash.y
             newTrash:setLinearVelocity( 0, velocidadeQueda + 50)
@@ -90,7 +90,7 @@ local function createTrash()
                 newTrash.y = e.y - lastY
                 newTrash:setLinearVelocity( 0, velocidadeQueda + 50 )
             end
-        end  
+        end 
     end
     newTrash:addEventListener("touch", moverLixo)
 
@@ -170,14 +170,19 @@ local function criarVidas()
     table.insert( lifeTable, newLife )
 
     local lastX = 0 --variavel que move a vida no eixo X
-    
+    local lastY = 0 --variavel que move a vida no eixo Y
+
     local function moverlife(e)
         if(e.phase == 'began' and e.phase == 'moved') then
-             lastX = e.x - newLife.x
+            lastX = e.x - newLife.x
+            lastY = e.y - newLife.y
+            newLife:setLinearVelocity( 0, velocidadeQueda + 50)
         elseif(e.phase == 'moved') then
             local newPosition = e.x - lastX 
             if(newPosition > 20 and newPosition < display.contentWidth-20 ) then
                 newLife.x = e.x - lastX
+                newLife.y = e.y - lastY
+                newLife:setLinearVelocity( 0, velocidadeQueda + 50 )
             end
         end  
     end
@@ -239,7 +244,7 @@ end
 local function aumentarDificuldade()
     if(velocidadeQueda < 1000)
     then
-        velocidadeQueda = velocidadeQueda + 5
+        velocidadeQueda = velocidadeQueda + 10
     end
 end
 
@@ -382,7 +387,7 @@ function scene:show( event )
         gameLoopTimer = timer.performWithDelay(3000, gameLoop, -1)
         dificuldade = timer.performWithDelay(10000, aumentarDificuldade, -1 )
         velocidade =  timer.performWithDelay(60000, umMinutoDeJogo)
-        velocidadeSegundoMinuto = timer.performWithDelay(1200000, doisMinutoDeJogo)
+        velocidadeSegundoMinuto = timer.performWithDelay(120000, doisMinutoDeJogo)
     end
 end
  
