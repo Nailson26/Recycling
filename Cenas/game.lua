@@ -4,7 +4,8 @@ local base = require( "base" )
 --Fisica
 local physics = require( "physics" )
 physics.start()
--- physics.setDrawMode("hybrid")
+physics.setDrawMode("hybrid")
+display.setStatusBar( display.HiddenStatusBar )
 
 --Grupos
 local backGroup = display.newGroup()
@@ -25,13 +26,14 @@ local pontos
 local vidas
 local gameLoopTimer
 local velocidadeQueda
-local velocidadeGerar
 local regenerador
 local offSet
 local caixaVidas
 local quantidadeVidas
 local dificuldade
 local velocidade
+local velocidadeSegundoMinuto
+local velocidadeContagem
 
 --Tabelas
 local trashTable = {}
@@ -40,7 +42,7 @@ local lifeTable = {}
 --Inicialização de variaveis
 pontos = 0
 vidas = 3
-velocidadeGerar = 3000
+velocidadeContagem = true
 velocidadeQueda = 1
 regenerador = 0
 offSet = { halfWidth = 18, halfHeight = 5, x = 0, y= -21 }
@@ -59,13 +61,13 @@ end
 local function createTrash()
 
     local this = math.random(1,9)
-    local thisOutLine = graphics.newOutline( 0, base.tipoLixo[this].img )
+    -- local thisOutLine = graphics.newOutline( -20, base.tipoLixo[this].img )
     -- local thisQueda = audio.loadStream( "Musicas/queda.wav")
     -- audio.play(thisQueda, {channel = 10})
     -- audio.setVolume(0.3)
 
     local newTrash = display.newImageRect(mainGroup, base.tipoLixo[this].img, base.tipoLixo[this].x, base.tipoLixo[this].y)
-    physics.addBody( newTrash, "dynamic", { outline= thisOutLine, bounce=0}  )
+    physics.addBody( newTrash, "dynamic", { radius=18, bounce=0}  )
     newTrash.myName = "trash"
     newTrash.x = math.random( 20, display.contentWidth-20 )
     newTrash.y =  - 60
@@ -76,7 +78,7 @@ local function createTrash()
     local lastX = 0 --variavel que move o lixo no eixo X
     
     local function moverLixo(e)
-        if(e.phase == 'began') then
+        if(e.phase == 'began' and e.phase == 'moved') then
              lastX = e.x - newTrash.x
         elseif(e.phase == 'moved') then
             local newPosition = e.x - lastX 
@@ -121,7 +123,8 @@ local function createTrash()
             end
             if(vidas == 0)
             then
-                timer.performWithDelay(300, gameOver)
+                timer.cancel( gameLoopTimer )
+                gameOver()
             end
         elseif(obj2.myName == "Lixeira" and obj2.tipo ~= base.tipoLixo[this].tipo)
         then 
@@ -139,6 +142,7 @@ local function createTrash()
             end
             if(vidas == 0)
             then
+                timer.cancel( gameLoopTimer )
                 gameOver()
             end
         end
@@ -149,10 +153,10 @@ end
 
 local function criarVidas()
     local this = math.random(1,4)
-    local thisOutLine = graphics.newOutline( 0, base.vida[this].img )
+    -- local thisOutLine = graphics.newOutline( 0, base.vida[this].img )
 
     local newLife = display.newImageRect(mainGroup, base.vida[this].img, base.vida[this].x, base.vida[this].y)
-    physics.addBody( newLife, "dynamic", { outline=thisOutLine, bounce=0} )
+    physics.addBody( newLife, "dynamic", { radius=18, bounce=0} )
     newLife.myName = "life"
     newLife.x = math.random( 20, display.contentWidth-20 )
     newLife.y = -60
@@ -163,7 +167,7 @@ local function criarVidas()
     local lastX = 0 --variavel que move a vida no eixo X
     
     local function moverlife(e)
-        if(e.phase == 'began') then
+        if(e.phase == 'began' and e.phase == 'moved') then
              lastX = e.x - newLife.x
         elseif(e.phase == 'moved') then
             local newPosition = e.x - lastX 
@@ -230,7 +234,7 @@ end
 local function aumentarDificuldade()
     if(velocidadeQueda < 1000)
     then
-        velocidadeQueda = velocidadeQueda + 10
+        velocidadeQueda = velocidadeQueda + 5
     end
 end
 
@@ -280,10 +284,17 @@ local function atualizador()
 end
 Runtime:addEventListener( "enterFrame", atualizador )
 
-local function velocidadeCriacao()
-    if(velocidadeGerar ~= 1000)then
-        velocidadeGerar = velocidadeGerar -1000
-    end
+
+local function umMinutoDeJogo()
+    timer.cancel( gameLoopTimer )
+    gameLoopTimer = timer.performWithDelay(2000, gameLoop, -1)
+    print("gerando a cada  dois segundos")
+end
+
+local function doisMinutoDeJogo()
+    timer.cancel( gameLoopTimer )
+    gameLoopTimer = timer.performWithDelay(1000, gameLoop, -1)
+    print("gerando a cada  um segundos")
 end
 
 -- create()
@@ -302,28 +313,28 @@ function scene:create( event )
     physics.addBody(plataforma, "static" )
     plataforma.myName = "Plataforma"
 	
-	lixeiraAzul = display.newImageRect(mainGroup, "Imagens/lixeira-azul.png" , 80, 100)
+	lixeiraAzul = display.newImageRect(mainGroup, "Imagens/lixeira-azul.png" , 70, 100)
     lixeiraAzul.x = (display.contentWidth/4)/2
 	lixeiraAzul.y = display.contentCenterY+198
     physics.addBody(lixeiraAzul, "static" , {box = offSet})
     lixeiraAzul.myName = "Lixeira"
     lixeiraAzul.tipo = "Papel"
     
-	lixeiraVermelha = display.newImageRect(mainGroup, "Imagens/lixeira-vermelha.png" , 80, 100)
+	lixeiraVermelha = display.newImageRect(mainGroup, "Imagens/lixeira-vermelha.png" , 70, 100)
     lixeiraVermelha.x = (display.contentWidth/4)/2 + 80
 	lixeiraVermelha.y = display.contentCenterY+198
     physics.addBody(lixeiraVermelha, "static", {box = offSet})
     lixeiraVermelha.myName = "Lixeira"
     lixeiraVermelha.tipo = "Plastico"
 
-	lixeiraAmarela = display.newImageRect(mainGroup, "Imagens/lixeira-amarela.png" , 80, 100)
+	lixeiraAmarela = display.newImageRect(mainGroup, "Imagens/lixeira-amarela.png" , 70, 100)
     lixeiraAmarela.x = (display.contentWidth/4)/2 + 160
 	lixeiraAmarela.y = display.contentCenterY+198
     physics.addBody(lixeiraAmarela, "static", {box = offSet})
     lixeiraAmarela.myName = "Lixeira"
     lixeiraAmarela.tipo = "Metal"
 
-	lixeiraVerde = display.newImageRect(mainGroup, "Imagens/lixeira-verde.png" , 80, 100)
+	lixeiraVerde = display.newImageRect(mainGroup, "Imagens/lixeira-verde.png" , 70, 100)
     lixeiraVerde.x = (display.contentWidth/4)/2 + 240
 	lixeiraVerde.y = display.contentCenterY+198
     physics.addBody(lixeiraVerde, "static", {box = offSet})
@@ -363,9 +374,10 @@ function scene:show( event )
     elseif ( phase == "did" ) then
         -- Code here runs when the scene is entirely on screen
         -- physics.start()
-        gameLoopTimer = timer.performWithDelay(velocidadeGerar, gameLoop, -1)
-        dificuldade = timer.performWithDelay(10000, aumentarDificuldade, 0 )
-        velocidade =  timer.performWithDelay(60000, velocidadeCriacao, 0 )
+        gameLoopTimer = timer.performWithDelay(3000, gameLoop, -1)
+        dificuldade = timer.performWithDelay(10000, aumentarDificuldade, -1 )
+        velocidade =  timer.performWithDelay(60000, umMinutoDeJogo)
+        velocidadeSegundoMinuto = timer.performWithDelay(1200000, doisMinutoDeJogo)
     end
 end
  
@@ -378,9 +390,9 @@ function scene:hide( event )
  
     if ( phase == "will" ) then
         -- Code here runs when the scene is on screen (but is about to go off screen)
-        timer.cancel( gameLoopTimer )
         timer.cancel(dificuldade)
         timer.cancel(velocidade)
+        timer.cancel(velocidadeSegundoMinuto)
         audio.stop(2)
         audio.stop(3)
     elseif ( phase == "did" ) then

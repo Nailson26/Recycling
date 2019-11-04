@@ -1,6 +1,7 @@
 local composer = require( "composer" )
  
 local scene = composer.newScene()
+display.setStatusBar( display.HiddenStatusBar )
 
 local backGroup  = display.newGroup()
 local mainGroup  = display.newGroup()
