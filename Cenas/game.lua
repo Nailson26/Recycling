@@ -354,7 +354,7 @@ function scene:create( event )
     caixaPontuacao = display.newImageRect(uiGroup, "Imagens/Caixa-pontuacao.png" , 110, 40)
     caixaPontuacao.x = display.contentWidth-55
 
-    pontuacao = display.newText(uiGroup, "0",  240, 300, native.systemFont, 16 )
+    pontuacao = display.newText(uiGroup, "0",  240, 300, "abscissa-bold.ttf", 16 )
     pontuacao.x = display.contentWidth-25
     pontuacao.y = display.contentCenterY-240
 
@@ -362,7 +362,7 @@ function scene:create( event )
     caixaVidas.x = display.contentWidth-55
     caixaVidas.y = display.contentHeight/2 - 200
 
-    quantidadeVidas = display.newText(uiGroup, "3",  240, 300, native.systemFont, 16 )
+    quantidadeVidas = display.newText(uiGroup, "3",  240, 300, "abscissa-bold.ttf", 16 )
     quantidadeVidas.x = display.contentWidth-25
     quantidadeVidas.y = display.contentCenterY-200
 

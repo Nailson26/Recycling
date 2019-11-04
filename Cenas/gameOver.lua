@@ -29,9 +29,9 @@ function scene:create( event )
     background.x = display.contentCenterX
     background.y = display.contentCenterY
     
-    text = display.newText(backGroup, "Game over",  240, 300, native.systemFont, 60)
+    text = display.newText(backGroup, "Game over",  240, 300, "abscissa-bold.ttf", 60)
     text.x = display.contentCenterX
-    text.y = display.contentCenterY
+    text.y = display.contentCenterY-100
 
     -- buttonReturn = display.newImageRect(backGroup, "Imagens/game-over-background.jpg", 320, 600)
 
