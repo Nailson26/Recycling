@@ -54,9 +54,9 @@ function scene:create( event )
     plataforma.y = display.contentCenterY-8
 
         --logo
-    logo = display.newImageRect(mainGroup, "Imagens/logo-recycling.png" , 250, 400)
-    logo.x = display.contentWidth/2 -5
-    logo.y = display.contentCenterY/2
+    logo = display.newImageRect(mainGroup, "Imagens/logo-2.png" , 400, 250)
+    logo.x = display.contentWidth/2
+    logo.y = display.contentCenterY/2+30
     
         --Botão (Camada 2)
     button = display.newImageRect(uiGroup, "Imagens/button-play.png" , 150, 80)
