@@ -6,6 +6,7 @@ local physics = require( "physics" )
 physics.start()
 -- physics.setDrawMode("hybrid")
 display.setStatusBar( display.HiddenStatusBar )
+system.activate( "multitouch" )
 
 --Grupos
 local backGroup = display.newGroup()
@@ -53,6 +54,12 @@ offSet = { halfWidth = 18, halfHeight = 5, x = 0, y= -21 }
 --funções
 
 local function gameOver()
+    for i = #base.pontuacao[10], 1, -1 do
+        if ( base.pontuacao[i].pontos < pontos) then
+            base.pontuacao[i].pontos = pontos
+            break
+        end
+    end
     composer.gotoScene("Cenas.gameOver" , {effect= "crossFade", time= 500})
 end
 
@@ -81,14 +88,15 @@ local function createTrash()
     local function moverLixo(e)
         if(e.phase == 'began' ) then
             lastX = e.x - newTrash.x
-            lastY = e.y - newTrash.y
             newTrash:setLinearVelocity( 0, velocidadeQueda + 50)
         elseif(e.phase == 'moved') then
             local newPositionX = e.x - lastX 
             if(newPositionX > 20 and newPositionX < display.contentWidth-20 ) then
                 newTrash.x = e.x - lastX
-                newTrash.y = e.y - lastY
-                newTrash:setLinearVelocity( 0, velocidadeQueda + 50 )
+                if( e.y >= newTrash.y )then
+                    newTrash.y = e.y + lastY
+                    newTrash:setLinearVelocity( 0, velocidadeQueda + 30 )
+                end
             end
         end 
     end
@@ -175,14 +183,15 @@ local function criarVidas()
     local function moverlife(e)
         if(e.phase == 'began' and e.phase == 'moved') then
             lastX = e.x - newLife.x
-            lastY = e.y - newLife.y
             newLife:setLinearVelocity( 0, velocidadeQueda + 50)
         elseif(e.phase == 'moved') then
             local newPosition = e.x - lastX 
             if(newPosition > 20 and newPosition < display.contentWidth-20 ) then
                 newLife.x = e.x - lastX
-                newLife.y = e.y - lastY
-                newLife:setLinearVelocity( 0, velocidadeQueda + 50 )
+                if( e.y >= newLife.y )then
+                    newLife.y = e.y + lastY
+                    newLife:setLinearVelocity( 0, velocidadeQueda + 30 )
+                end
             end
         end  
     end
@@ -388,6 +397,9 @@ function scene:show( event )
         dificuldade = timer.performWithDelay(10000, aumentarDificuldade, -1 )
         velocidade =  timer.performWithDelay(60000, umMinutoDeJogo)
         velocidadeSegundoMinuto = timer.performWithDelay(120000, doisMinutoDeJogo)
+        print(base.pontuacao[1].pontuacao)
+        print(base.pontuacao[2].pontuacao)
+        print(base.pontuacao[3].pontuacao)
     end
 end
  

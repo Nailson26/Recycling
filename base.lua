@@ -1,7 +1,9 @@
 local base = {}
 base.tipoLixo = {}
 base.vida = {}
+base.pontuacao = {}
 
+---------------------------------------------- Base ----------------------------------------
 base.tipoLixo[1] = {}
 base.tipoLixo[1].img = "Imagens/lata.png"
 base.tipoLixo[1].x = 35
@@ -81,5 +83,36 @@ base.vida[4].img = "Imagens/coracao-verde.png"
 base.vida[4].x = 35
 base.vida[4].y = 35
 base.vida[4].tipo = "Vidro"
+
+-------------------------------------------- Pontuacao --------------------------------------
+base.pontuacao[1] = {}
+base.pontuacao[1].pontos = 0
+
+base.pontuacao[2] = {}
+base.pontuacao[2].pontos = 0
+
+base.pontuacao[3] = {}
+base.pontuacao[3].pontos = 0
+
+base.pontuacao[4] = {}
+base.pontuacao[4].pontos = 0
+
+base.pontuacao[5] = {}
+base.pontuacao[5].pontos = 0
+
+base.pontuacao[6] = {}
+base.pontuacao[6].pontos = 0
+
+base.pontuacao[7] = {}
+base.pontuacao[7].pontos = 0
+
+base.pontuacao[8] = {}
+base.pontuacao[8].pontos = 0
+
+base.pontuacao[9] = {}
+base.pontuacao[9].pontos = 0
+
+base.pontuacao[10] = {}
+base.pontuacao[10].pontos = 0
 
 return base
