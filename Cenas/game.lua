@@ -54,12 +54,6 @@ offSet = { halfWidth = 18, halfHeight = 5, x = 0, y= -21 }
 --funções
 
 local function gameOver()
-    for i = #base.pontuacao[10], 1, -1 do
-        if ( base.pontuacao[i].pontos < pontos) then
-            base.pontuacao[i].pontos = pontos
-            break
-        end
-    end
     composer.gotoScene("Cenas.gameOver" , {effect= "crossFade", time= 500})
 end
 
@@ -74,7 +68,7 @@ local function createTrash()
     -- audio.setVolume(0.3)
 
     local newTrash = display.newImageRect(mainGroup, base.tipoLixo[this].img, base.tipoLixo[this].x, base.tipoLixo[this].y)
-    physics.addBody( newTrash, "dynamic", { radius=18, bounce=0}  )
+    physics.addBody( newTrash, "dynamic", { radius=20, bounce=0}  )
     newTrash.myName = "trash"
     newTrash.x = math.random( 20, display.contentWidth-20 )
     newTrash.y =  - 60
@@ -307,13 +301,11 @@ Runtime:addEventListener( "enterFrame", atualizador )
 local function umMinutoDeJogo()
     timer.cancel( gameLoopTimer )
     gameLoopTimer = timer.performWithDelay(2000, gameLoop, -1)
-    print("gerando a cada  dois segundos")
 end
 
 local function doisMinutoDeJogo()
     timer.cancel( gameLoopTimer )
     gameLoopTimer = timer.performWithDelay(1000, gameLoop, -1)
-    print("gerando a cada  um segundos")
 end
 
 -- create()
@@ -397,9 +389,6 @@ function scene:show( event )
         dificuldade = timer.performWithDelay(10000, aumentarDificuldade, -1 )
         velocidade =  timer.performWithDelay(60000, umMinutoDeJogo)
         velocidadeSegundoMinuto = timer.performWithDelay(120000, doisMinutoDeJogo)
-        print(base.pontuacao[1].pontuacao)
-        print(base.pontuacao[2].pontuacao)
-        print(base.pontuacao[3].pontuacao)
     end
 end
  
