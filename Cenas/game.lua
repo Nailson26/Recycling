@@ -106,7 +106,7 @@ local function createTrash()
             pontos = pontos + 10
             regenerador = regenerador + 1
             local reciclado = audio.loadStream( "Musicas/Item1A.wav")
-	        audio.play(reciclado, {channel = 3})
+	        audio.play(reciclado, {channel = 3, loops = 0})
 	        audio.setVolume( 1.0 , {channel = 3} )
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
@@ -120,8 +120,8 @@ local function createTrash()
             vidas = vidas - 1
             regenerador = 0
             local NaoReciclado = audio.loadStream( "Musicas/Item1B.wav")
-	        audio.play(NaoReciclado, {channel = 3})
-	        audio.setVolume( 1.0 , {channel = 3} )
+	        audio.play(NaoReciclado, {channel = 4, loops = 0})
+	        audio.setVolume( 1.0 , {channel = 4} )
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
                     table.remove( trashTable, i)
@@ -138,9 +138,9 @@ local function createTrash()
             display.remove(obj1)
             vidas = vidas - 1
             regenerador = 0
-            local NaoReciclado = audio.loadStream( "Musicas/Item1B.wav")
-	        audio.play(NaoReciclado, {channel = 3})
-	        audio.setVolume( 1.0 , {channel = 3} )
+            local NaoReciclado2 = audio.loadStream( "Musicas/Item1B.wav")
+	        audio.play(NaoReciclado2, {channel = 5, loops = 0})
+	        audio.setVolume( 1.0 , {channel = 5} )
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
                     table.remove( trashTable, i)
@@ -204,7 +204,7 @@ local function criarVidas()
                 pontos = pontos + 50
             end
             local vidaAcerto = audio.loadStream( "Musicas/vida-acerto.wav")
-            audio.play(vidaAcerto, {channel = 6})
+            audio.play(vidaAcerto, {channel = 6, loops = 0})
             audio.setVolume(0.3)
             for i = #lifeTable, 1, -1 do
                 if ( lifeTable[i] == obj1) then
@@ -216,7 +216,7 @@ local function criarVidas()
         then
             display.remove(obj1)
             local vidaErro = audio.loadStream( "Musicas/vida-erro.wav")
-            audio.play(vidaErro, {channel = 6})
+            audio.play(vidaErro, {channel = 7, loops = 0})
             audio.setVolume(0.3)
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
@@ -227,8 +227,8 @@ local function criarVidas()
         elseif(obj2.myName == "Lixeira" and obj2.tipo ~= base.vida[this].tipo)
         then 
             display.remove(obj1)
-            local vidaErro = audio.loadStream( "Musicas/vida-erro.wav")
-            audio.play(vidaErro, {channel = 6})
+            local vidaErro2 = audio.loadStream( "Musicas/vida-erro.wav")
+            audio.play(vidaErro2, {channel = 8, loops = 0})
             audio.setVolume(0.3)
             for i = #trashTable, 1, -1 do
                 if ( trashTable[i] == obj1) then
@@ -406,6 +406,11 @@ function scene:hide( event )
         timer.cancel(velocidadeSegundoMinuto)
         audio.stop(2)
         audio.stop(3)
+        audio.stop(4)
+        audio.stop(5)
+        audio.stop(6)
+        audio.stop(7)
+        audio.stop(8)
     elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
         Runtime:removeEventListener("enterFrame", atualizador)
